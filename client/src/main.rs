@@ -4,9 +4,8 @@ use game::GameBattleShip;
 
 fn main() {
     
-    match GameBattleShip::new() {
-        Some(mut game) => game.init_game(),
-        None => ()
+    if let Some(mut game) = GameBattleShip::new() {
+        game.init_game()        
     }
     // let mut client = TcpStream::connect(LOCAL).expect("Tcpstream no creado");
     // client.set_nonblocking(true).expect("No se ejecuto set_nonblocking");
