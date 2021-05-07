@@ -1,4 +1,4 @@
-use std::{io::{ErrorKind, Read, Write}, net::TcpStream, str::FromStr};
+use std::{io::{ErrorKind, Read, Write}};
 use std::net::TcpListener;
 use std::sync::mpsc;
 use std::thread;
@@ -14,9 +14,6 @@ pub enum ServiceQuery {
 pub struct PacketGameMessage {
     type_packet: ServiceQuery,
     attack_coordinate: Option<Vec<u8>>        
-}
-fn sleep() {
-    thread::sleep(::std::time::Duration::from_millis(100));
 }
 fn main() {
     let server = TcpListener::bind(LOCAL).expect("No se conecto a la Ip");
@@ -42,7 +39,7 @@ fn main() {
                         break;
                     }
                 }
-                sleep();
+                thread::sleep(::std::time::Duration::from_millis(100));
             });
         }
         if let Ok(packet) = receiver.try_recv() {                        
@@ -51,6 +48,6 @@ fn main() {
             clients[0].write_all(&struct_byte)
                 .expect("escritura fallida en el socket");
         }
-        sleep();
+        thread::sleep(::std::time::Duration::from_millis(100));
     }
 }

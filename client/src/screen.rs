@@ -1,5 +1,4 @@
 use std::{thread, time::Duration};
-
 use dialoguer::{ Select, theme::ColorfulTheme};
 use indicatif::{ProgressBar, ProgressStyle};
 use console::Term;
