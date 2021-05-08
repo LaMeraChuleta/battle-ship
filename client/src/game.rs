@@ -45,8 +45,8 @@ impl GameBattleShip {
     pub fn init_game(&mut self) {               
         let (sender, reciver) = mpsc::channel::<ServiceQuery>();   
         let (sender_packet, reciver_packet) = mpsc::channel::<PacketGameMessage>();     
-        let mut copy_connection = self.conection.try_clone().unwrap();
-        copy_connection.set_nonblocking(true).expect("No se ejecuto set_nonblocking");
+        let mut connection_send_server = self.conection.try_clone().unwrap();
+        connection_send_server.set_nonblocking(true).expect("No se ejecuto set_nonblocking");
         thread::spawn(move || loop {               
             match reciver.try_recv() {                
                 Ok(query_servie) => {                                      
@@ -55,7 +55,7 @@ impl GameBattleShip {
                             let packet = PacketGameMessage { type_packet: ServiceQuery::PlayersConnect, attack_coordinate: None};
                             let mut struct_byte = bincode::serialize(&packet).unwrap();                                                                                                                                                               
                             struct_byte.resize(32, 0);                            
-                            copy_connection
+                            connection_send_server
                                 .write_all(&struct_byte)
                                 .expect("escritura fallida en el socket");                                                                   
                         }                                                                                                         
@@ -66,12 +66,11 @@ impl GameBattleShip {
             }
             thread::sleep(Duration::from_millis(100));            
         });
-        let mut copy_connection_other = self.conection.try_clone().unwrap();
-        copy_connection_other.set_nonblocking(true).expect("No se ejecuto set_nonblocking");
-
+        let mut connection_reciver_server = self.conection.try_clone().unwrap();
+        connection_reciver_server.set_nonblocking(true).expect("No se ejecuto set_nonblocking");
         thread::spawn(move || loop {
             let mut buff = vec![0,32];     
-            match copy_connection_other.read(&mut buff) {
+            match connection_reciver_server.read(&mut buff) {
                 Ok(_) => {                                                                  
                     buff.resize(32, 0);                               
                     let package_message: PacketGameMessage = bincode::deserialize(&buff[..]).unwrap();                    
@@ -89,7 +88,7 @@ impl GameBattleShip {
         loop {
             match self.type_view {
                 ScreenType::ScreenInitGame => {
-                    self.type_view = self.screen_game.screen_new_game()
+                    self.type_view = self.screen_game.screen_new_game();                             
                 },                                                                            
                 ScreenType::ScreenSearchPlayer => {                      
                     sender.send(ServiceQuery::PlayersConnect).unwrap();                   
@@ -99,17 +98,19 @@ impl GameBattleShip {
                     loop {                        
                         match reciver_packet.try_recv(){
                             Ok(packet) => {                                
-                                println!("{:?}", &packet);
-                                self.type_view = ScreenType::ScreenInitGame;                                
+                                println!("{:?}", &packet);                                                                
                                 break
                             },
                             Err(TryRecvError::Empty) => (),    
                             Err(TryRecvError::Disconnected) => break,                                                        
                         }
                     }
+                    self.screen_game.screen_load_oponnent();
+                    self.type_view = ScreenType::ScreenInitGame;
                 }
                 ScreenType::ScreenOut => break
-            }            
+            }  
+            thread::sleep(Duration::from_millis(100))              
         }        
     }
 }

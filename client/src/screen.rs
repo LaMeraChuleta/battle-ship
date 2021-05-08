@@ -19,15 +19,13 @@ impl Default for Screen {
 }
 impl Screen {   
     pub fn screen_new_game(&mut self) -> ScreenType {     
-        let title = format!("{}  Bienvenido  {}", Emoji("🌊",""), Emoji("🌊",""));
-        self.current_view
-            .write_line(&title)
-            .unwrap();
+        let title = format!("{}  BattleShip Rusteado  {}", Emoji("🌊",""), Emoji("🌊",""));
         let opcion_game_view = vec!["📺 Nuevo Juego", "🚀 Salir"];
         let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt(&title)
             .items(&opcion_game_view)
             .default(0)
-            .interact_on_opt(&Term::stderr()).unwrap();            
+            .interact_on_opt(&Term::stdout()).unwrap();           
         let screen = match selection {
             Some(index) => {
                 if index == 0{
@@ -36,11 +34,10 @@ impl Screen {
                 ScreenType::ScreenOut
             },
             None => ScreenType::ScreenOut            
-        };      
-        self.current_view.clear_screen().unwrap();                    
+        };                                                 
         screen
     }
-    pub fn screen_search_oponnent(&mut self){                     
+    pub fn screen_load_oponnent(&mut self){                     
         let bar = ProgressBar::new(20);
         bar.set_style(ProgressStyle::default_bar()
             .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
@@ -49,7 +46,8 @@ impl Screen {
             bar.inc(1);
             thread::sleep(Duration::from_millis(300));                        
         }
-        bar.finish();                    
+        bar.finish();  
+        self.current_view.clear_to_end_of_screen().unwrap()                  
     }
 }
 
