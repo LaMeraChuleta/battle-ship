@@ -1,2 +1,4 @@
 # Generated files
-/target/
+/client/target/
+/console/target/
+/service/target/
