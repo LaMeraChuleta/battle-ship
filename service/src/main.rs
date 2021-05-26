@@ -29,7 +29,9 @@ fn main() {
                 let mut buff = vec![0; 32];
                 match socket.read_exact(&mut buff) {                    
                     Ok(_) => {                                                
-                        let entity_descer_byte: PacketGameMessage = deserialize(&buff[..]).unwrap();                                                
+                        let mut entity_descer_byte: PacketGameMessage = deserialize(&buff[..]).unwrap(); 
+                        let vec_dir = vec![2, 6, 7];
+                        entity_descer_byte.attack_coordinate = Some(vec_dir);
                         println!("{} dice: {:?}", addr, entity_descer_byte);                                           
                         sender.send(entity_descer_byte).unwrap();
                     }
@@ -43,8 +45,9 @@ fn main() {
             });
         }
         if let Ok(packet) = receiver.try_recv() {                        
-            let mut struct_byte = bincode::serialize(&packet).unwrap();    
-            struct_byte.resize(32, 0);                                             
+            let mut struct_byte = bincode::serialize(&packet).unwrap();  
+            println!("{:?}",struct_byte);  
+            //struct_byte.resize(32, 0);                                             
             clients[0].write_all(&struct_byte)
                 .expect("escritura fallida en el socket");
         }
