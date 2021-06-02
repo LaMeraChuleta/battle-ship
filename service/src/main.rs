@@ -1,9 +1,8 @@
-use std::{io::{ErrorKind, Read, Write}};
+use std::{io::{self, ErrorKind, Read, Write, BufRead}};
 use std::net::TcpListener;
 use std::sync::mpsc;
 use std::thread;
 use serde::{Serialize, Deserialize};
-use bincode::deserialize;
 use serde_json;
 
 const LOCAL: &str = "192.168.100.7:3000";
@@ -26,18 +25,16 @@ fn main() {
             println!("Cliente: {} Conectado", addr);
             let sender = sender.clone();
             clients.push(socket.try_clone().expect("Fallo clonando el cliente"));
-            thread::spawn(move || loop {
-                const MESSAGE_SIZE: usize = 500;
-                let mut buff: Vec<u8> = vec![];
-                let mut rx_bytes = [0u8; MESSAGE_SIZE];
-                match socket.read(&mut rx_bytes) {                    
-                    Ok(bytes_size) => {  
-
-                        buff.extend_from_slice(&rx_bytes[..bytes_size]);                                             
-                        println!("{:?}",&buff);
-                        let strin_json = String::from_utf8(buff).unwrap();  
-                        print!("{:?}", strin_json); 
-                        let mut entity_descer_byte: PacketGameMessage = serde_json::from_str(&strin_json).unwrap();
+            thread::spawn(move || loop {                
+                let mut buff: Vec<u8> = vec![];                
+                match socket.read(&mut buff) {                    
+                    Ok(_) => {                          
+                        let mut reader = io::BufReader::new(&mut socket);                                                            
+                        let received: Vec<u8> = reader.fill_buf().unwrap().to_vec();                               
+                        reader.consume(received.len());
+                        let string_json = String::from_utf8(received).unwrap();                                                                                                                                         
+                        print!("{:?}", string_json); 
+                        let mut entity_descer_byte: PacketGameMessage = serde_json::from_str(&string_json).unwrap();
                         let vec_dir = vec![2, 6, 7];
                         entity_descer_byte.attack_coordinate = Some(vec_dir);
                         println!("{} dice: {:?}", addr, entity_descer_byte);                                           
@@ -53,9 +50,8 @@ fn main() {
             });
         }
         if let Ok(packet) = receiver.try_recv() {                        
-            let mut struct_byte = serde_json::to_string(&packet).unwrap();  
-            println!("{:?}",struct_byte);  
-            //struct_byte.resize(32, 0);                                             
+            let struct_byte = serde_json::to_string(&packet).unwrap();  
+            println!("{:?}",struct_byte);                                                        
             clients[0].write_all(&struct_byte.as_bytes())
                 .expect("escritura fallida en el socket");
             clients[0].flush().unwrap()

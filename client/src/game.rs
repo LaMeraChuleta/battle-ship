@@ -1,7 +1,7 @@
 use client::Player;
 use client::Screen;
 use client::ScreenType;
-use std::{io::{Read, ErrorKind, Write}, net::{TcpStream}, sync::mpsc::{self, TryRecvError}, vec};
+use std::{io::{self, Read, ErrorKind, Write, BufRead}, net::{TcpStream}, sync::mpsc::{self, TryRecvError}, vec};
 use std::time::Duration;
 use std::thread;
 use std::option::Option;
@@ -71,11 +71,16 @@ impl GameBattleShip {
         let mut connection_reciver_server = self.conection.try_clone().unwrap();
         connection_reciver_server.set_nonblocking(true).expect("No se ejecuto set_nonblocking");
         thread::spawn(move || loop {
-            let mut buff = vec![0,32];     
+            let mut buff = vec![];     
             match connection_reciver_server.read(&mut buff) {
                 Ok(_) => {                                                                  
-                    buff.resize(32, 0);                               
-                    let package_message: PacketGameMessage = bincode::deserialize(&buff[..]).unwrap();                    
+                    let mut reader = io::BufReader::new(&mut connection_reciver_server);                                                            
+                    let received: Vec<u8> = reader.fill_buf().unwrap().to_vec();                               
+                    reader.consume(received.len());   
+                    let string_json = String::from_utf8(received).unwrap();   
+                    println!("{:?}", string_json); 
+                    let package_message: PacketGameMessage = serde_json::from_str(&string_json).unwrap();      
+                    println!("{:?}", package_message);                                                                                                                                                    
                     sender_packet.send(package_message).unwrap();      
                     thread::sleep(Duration::from_secs(10));         
                 },
