@@ -6,6 +6,7 @@ use std::time::Duration;
 use std::thread;
 use std::option::Option;
 use serde::{Serialize, Deserialize};
+use serde_json;
 
 const LOCAL: &str = "192.168.100.7:3000";
 pub struct GameBattleShip {
@@ -51,13 +52,14 @@ impl GameBattleShip {
             match reciver.try_recv() {                
                 Ok(query_servie) => {                                      
                     match query_servie {
-                        ServiceQuery::PlayersConnect => {
-                            let packet = PacketGameMessage { type_packet: ServiceQuery::PlayersConnect, attack_coordinate: None};
-                            let mut struct_byte = bincode::serialize(&packet).unwrap();                                                                                                                                                               
-                            struct_byte.resize(32, 0);                            
-                            connection_send_server
-                                .write_all(&struct_byte)
-                                .expect("escritura fallida en el socket");                                                                   
+                        ServiceQuery::PlayersConnect => {                            
+                            let packet = PacketGameMessage { type_packet: ServiceQuery::PlayersConnect, attack_coordinate: None};                                                                    
+                            let struct_json = serde_json::to_string(&packet).unwrap();
+                            println!("{:?}", struct_json);     
+                            println!("{:?}", &struct_json.as_bytes());                                                                                                                                                                                                                  
+                            connection_send_server.write_all(struct_json.as_bytes()).unwrap();    
+                            connection_send_server.flush().unwrap();
+                                                                                                                                                 
                         }                                                                                                         
                     }                          
                 }
