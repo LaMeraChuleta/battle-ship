@@ -32,14 +32,13 @@ pub struct PacketGameMessage {
 
 impl GameBattleShip {
     pub fn new() -> Option<Self>{
-        let tcp_player = TcpStream::connect(LOCAL)
-            .expect("no se creo el tcp");      
+        let tcp_player = TcpStream::connect(LOCAL).expect("no se creo el tcp");      
         tcp_player.set_nonblocking(true).unwrap();    
         let player = Self{            
-                player_ship: Player::default(),
-                screen_game: Screen::default(),
-                type_view: ScreenType::ScreenInitGame,
-                conection: tcp_player
+            player_ship: Player::default(),
+            screen_game: Screen::default(),
+            type_view: ScreenType::ScreenInitGame,
+            conection: tcp_player
         }; 
         Some(player)   
     }
@@ -54,12 +53,9 @@ impl GameBattleShip {
                     match query_servie {
                         ServiceQuery::PlayersConnect => {                            
                             let packet = PacketGameMessage { type_packet: ServiceQuery::PlayersConnect, attack_coordinate: None};                                                                    
-                            let struct_json = serde_json::to_string(&packet).unwrap();
-                            println!("{:?}", struct_json);     
-                            println!("{:?}", &struct_json.as_bytes());                                                                                                                                                                                                                  
+                            let struct_json = serde_json::to_string(&packet).unwrap();                                                           
                             connection_send_server.write_all(struct_json.as_bytes()).unwrap();    
-                            connection_send_server.flush().unwrap();
-                                                                                                                                                 
+                            connection_send_server.flush().unwrap();                                                                                                                                                 
                         }                                                                                                         
                     }                          
                 }
@@ -77,10 +73,8 @@ impl GameBattleShip {
                     let mut reader = io::BufReader::new(&mut connection_reciver_server);                                                            
                     let received: Vec<u8> = reader.fill_buf().unwrap().to_vec();                               
                     reader.consume(received.len());   
-                    let string_json = String::from_utf8(received).unwrap();   
-                    println!("{:?}", string_json); 
-                    let package_message: PacketGameMessage = serde_json::from_str(&string_json).unwrap();      
-                    println!("{:?}", package_message);                                                                                                                                                    
+                    let string_json = String::from_utf8(received).unwrap();                       
+                    let package_message= serde_json::from_str::<PacketGameMessage>(&string_json).unwrap();                                                                                                                                                                      
                     sender_packet.send(package_message).unwrap();      
                     thread::sleep(Duration::from_secs(10));         
                 },
@@ -104,7 +98,7 @@ impl GameBattleShip {
                 ScreenType::ScreenWait => {
                     loop {                        
                         match reciver_packet.try_recv(){
-                            Ok(packet) => {                                
+                            Ok(packet) => {                                  
                                 println!("{:?}", &packet);                                                                
                                 break
                             },

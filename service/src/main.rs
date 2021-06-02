@@ -32,8 +32,7 @@ fn main() {
                         let mut reader = io::BufReader::new(&mut socket);                                                            
                         let received: Vec<u8> = reader.fill_buf().unwrap().to_vec();                               
                         reader.consume(received.len());
-                        let string_json = String::from_utf8(received).unwrap();                                                                                                                                         
-                        print!("{:?}", string_json); 
+                        let string_json = String::from_utf8(received).unwrap();                                                                                                                                                                 
                         let mut entity_descer_byte: PacketGameMessage = serde_json::from_str(&string_json).unwrap();
                         let vec_dir = vec![2, 6, 7];
                         entity_descer_byte.attack_coordinate = Some(vec_dir);
@@ -50,8 +49,7 @@ fn main() {
             });
         }
         if let Ok(packet) = receiver.try_recv() {                        
-            let struct_byte = serde_json::to_string(&packet).unwrap();  
-            println!("{:?}",struct_byte);                                                        
+            let struct_byte = serde_json::to_string(&packet).unwrap();                                                               
             clients[0].write_all(&struct_byte.as_bytes())
                 .expect("escritura fallida en el socket");
             clients[0].flush().unwrap()
