@@ -1,47 +1,66 @@
-use std::{io::{self, Read, Write}, net::TcpStream, sync::mpsc::{self, TryRecvError}, thread, time::Duration};
-const LOCAL: &str = "192.168.100.7:3000";
-fn main(){
+use std::io;
+use tui::Terminal;
+use tui::backend::CrosstermBackend;
+use tui::text::{ Span, Spans, Text };
+use tui::style::{ Style, Color, Modifier };
+use tui::widgets::{ Block, Borders, Paragraph, BorderType, List, ListItem, Wrap };
+use tui::layout::{ Layout, Constraint, Direction, Rect, Alignment };
+fn main() -> Result<(), io::Error>{
+    let stdout = io::stdout();
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+    terminal.clear()?;
+    loop {                
+        terminal.draw(|f| {                         
+            let chunks = Layout::default()
+                .margin(1)
+                .direction(Direction::Horizontal)
+                .constraints([
+                        Constraint::Percentage(20),
+                        Constraint::Percentage(80)
+                    ].as_ref())
+                .split(f.size());
 
-    let mut client = TcpStream::connect(LOCAL).unwrap();
-    client
-    .set_nonblocking(true)
-    .expect("No se ejecuto set_nonblocking");
-    let (sender, reciver) = mpsc::channel::<String>();
-    thread::spawn(move || loop{
-        let mut buff = vec![0; 32];  
-        match client.read_exact(&mut buff){
-            Ok(_) => println!("{:?}", buff),
-            _ => ()
-        }
+            let copyright = Paragraph::new("pet-CLI 2020 - all rights reserved")
+                .style(Style::default().fg(Color::LightCyan))
+                .alignment(Alignment::Center)
+                .block(
+                    Block::default()
+                    .title("Block")
+                    .borders(Borders::LEFT | Borders::RIGHT)
+                    .border_style(Style::default().fg(Color::White))
+                    .border_type(BorderType::Rounded)
+                    .style(Style::default().bg(Color::Black))                       
+                );  
+            // let text = vec![
+            //         Spans::from(vec![
+            //             Span::raw("Battle"),
+            //             Span::styled("Ship",Style::default().add_modifier(Modifier::ITALIC)),
+            //             Span::raw("."),
+            //         ]),
+            //         Spans::from(Span::styled("Rusteado", Style::default().fg(Color::Red))),
+            //     ];
+            // let titulo = Paragraph::new(text)
+            //         .block(Block::default().borders(Borders::ALL))
+            //         .style(Style::default().fg(Color::White).bg(Color::Black))
+            //         .alignment(Alignment::Center)
+            //         .wrap(Wrap { trim: true });  
+            f.render_widget(copyright, chunks[0]);                                                                   
+                              
+            let chunks2 = Layout::default()
+                .constraints([Constraint::Percentage(500), Constraint::Percentage(50)].as_ref())
+                .direction(Direction::Horizontal)
+                .split(chunks[1] ); 
+            let items = [ListItem::new("Item 1"), ListItem::new("Item 2"), ListItem::new("Item 3")];
+                
+            let tasks = List::new(items)
+                .block(Block::default().borders(Borders::ALL).title("List"))
+                .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+                .highlight_symbol("> ");
 
-        match reciver.try_recv() {
-            Ok(msg) => {
-                let mut buff = msg
-                    .clone()
-                    .into_bytes();
-                buff.resize(32, 0);
-                client
-                    .write_all(&buff)
-                    .expect("escritura fallida en el socket");
-                println!("Mensaje Enviado {:?}", msg);
-            }
-            Err(TryRecvError::Empty) => (),
-            Err(TryRecvError::Disconnected) => break,
-        }
-        thread::sleep(Duration::from_millis(100))
-    });
-
-    loop {
-        let mut buff = String::new();
-        io::stdin()
-            .read_line(&mut buff)
-            .expect("fallo al leer el mensaje");
-        let msg = buff.trim().to_string();
-        if msg == ":quit" || sender.send(msg).is_err() {
-            break;
-        } 
-    }   
-     
-
-
+            
+            f.render_widget(tasks, chunks[1]);                                         
+        })?;
+        terminal.autoresize()?;
+    }    
 }
