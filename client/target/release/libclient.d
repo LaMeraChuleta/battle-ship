@@ -1,1 +1,0 @@
-C:\Users\Desarrollo3\Desktop\servidor-cliente-rust\client\target\release\libclient.rlib: C:\Users\Desarrollo3\Desktop\servidor-cliente-rust\client\src\lib.rs C:\Users\Desarrollo3\Desktop\servidor-cliente-rust\client\src\player.rs C:\Users\Desarrollo3\Desktop\servidor-cliente-rust\client\src\screen.rs
