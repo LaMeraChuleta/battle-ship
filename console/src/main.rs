@@ -17,10 +17,7 @@ fn main() -> Result<(), io::Error>{
             let chunks = Layout::default()
                 .margin(1)                   
                 .direction(Direction::Vertical)                
-                .constraints([
-                        Constraint::Percentage(20),
-                        Constraint::Percentage(80)
-                    ].as_ref())
+                .constraints([Constraint::Percentage(20),Constraint::Percentage(80)].as_ref())
                 .split(f.size());
 
             let copyright = Paragraph::new("BATTLE SHIP RUSTEADO")
@@ -90,48 +87,48 @@ fn main() -> Result<(), io::Error>{
             }  
             let tabla = Table::new(vec![
                 // Row can be created from simple strings.
-                Row::new(vec!["", "1", "2", "3","4","5","6","7","8","9"]).style(Style::default().fg(Color::Blue)).height(1),
-                // You can style the entire row.
-                
+                //Row::new(vec!["A", "", "", "","","","","","",""]).style(Style::default().fg(Color::Blue)).height(1),
+                //Row::new(vec!["A", "", "", "","","","","","",""]).style(Style::default().fg(Color::Blue)).height(1),
+                //Row::new(vec!["A", "", "", "","","","","","",""]).style(Style::default().fg(Color::Blue)).height(1),
+                // You can style the entire row.                
                 // If you need more control over the styling you may need to create Cells directly
                 Row::new(vec![
-                    Cell::from("Row31"),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),                    
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
+                    Cell::from("B").style(Style::default().bg(Color::Green)),
+                    Cell::from(""),                    
+                    Cell::from(""),
+                    Cell::from(""),
+                    Cell::from(""),
+                    Cell::from(""),
+                    Cell::from(""),
+                    Cell::from(""),
+                    Cell::from(""),
                 ]),
                 // If a Row need to display some content over multiple lines, you just have to change
                 // its height.
-                Row::new(vec![
-                    Cell::from("Row\n41"),
-                    Cell::from("Row\n42"),
-                    Cell::from("Row\n43"),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                    Cell::from("Row32").style(Style::default().fg(Color::Yellow)),
-                ]).height(2),
+                // Row::new(vec![
+                //     Cell::from("C"),
+                //     Cell::from(""),
+                //     Cell::from(""),
+                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
+                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
+                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
+                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
+                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
+                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
+                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
+                // ]).height(2),
             ])
             // You can set the style of the entire Table.
             .style(Style::default().fg(Color::White))
             // It has an optional header, which is simply a Row always visible at the top.
             .header(
                 Row::new(vec!["", "1", "2", "3","4","5","6","7","8","9"])
-                    .style(Style::default().fg(Color::Yellow))
+                    .style(Style::default().fg(Color::Yellow).bg(Color::Green)).height(1)
                     // If you want some space between the header and the rest of the rows, you can always
-                    // specify some margin at the bottom.
-                    .bottom_margin(1)
+                    // specify some margin at the bottom.                    
             )
             // As any other widget, a Table can be wrapped in a Block.
-            .block(Block::default().title("Table"))
+            .block(Block::default().title("Table"))            
             // Columns widths are constrained in the same way as Layout...
             .widths(&[Constraint::Length(5), Constraint::Length(5), Constraint::Length(5),Constraint::Length(5), Constraint::Length(5), Constraint::Length(5),Constraint::Length(5), Constraint::Length(5), Constraint::Length(5),Constraint::Length(5)])
             // ...and they can be separated by a fixed spacing.
