@@ -1,11 +1,11 @@
 use std::io;
 use tui::Terminal;
 use tui::backend::CrosstermBackend;
-use tui::text::{ Span, Spans, Text };
+use tui::text::{ Span };
 use tui::style::{ Style, Color, Modifier };
 use tui::symbols;
-use tui::widgets::{ Block, Borders, Paragraph, BorderType, List, ListItem, Wrap, Axis, Dataset, Chart, GraphType, Row, Cell, Table };
-use tui::layout::{ Layout, Constraint, Direction, Rect, Alignment };
+use tui::widgets::{ Block, Borders, Paragraph, BorderType, Axis, Dataset, Chart, GraphType, Row, Cell, Table };
+use tui::layout::{ Layout, Constraint, Direction, Alignment };
 fn main() -> Result<(), io::Error>{
     let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
@@ -64,7 +64,7 @@ fn main() -> Result<(), io::Error>{
                     ];
 
                     let tablero = Chart::new(datasets)       
-                    .block(      Block::default()                    
+                    .block(Block::default()                    
                         .borders(Borders::ALL)
                         .title("Tablero")                    
                         .border_style(Style::default().fg(Color::White))
@@ -85,45 +85,33 @@ fn main() -> Result<(), io::Error>{
                     f.render_widget(tablero, chunks2[0]);             
                 }                   
             }  
-            let tabla = Table::new(vec![
-                // Row can be created from simple strings.
-                //Row::new(vec!["A", "", "", "","","","","","",""]).style(Style::default().fg(Color::Blue)).height(1),
-                //Row::new(vec!["A", "", "", "","","","","","",""]).style(Style::default().fg(Color::Blue)).height(1),
-                //Row::new(vec!["A", "", "", "","","","","","",""]).style(Style::default().fg(Color::Blue)).height(1),
-                // You can style the entire row.                
-                // If you need more control over the styling you may need to create Cells directly
-                Row::new(vec![
-                    Cell::from("B").style(Style::default().bg(Color::Green)),
-                    Cell::from(""),                    
-                    Cell::from(""),
-                    Cell::from(""),
-                    Cell::from(""),
-                    Cell::from(""),
-                    Cell::from(""),
-                    Cell::from(""),
-                    Cell::from(""),
-                ]),
-                // If a Row need to display some content over multiple lines, you just have to change
-                // its height.
-                // Row::new(vec![
-                //     Cell::from("C"),
-                //     Cell::from(""),
-                //     Cell::from(""),
-                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
-                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
-                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
-                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
-                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
-                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
-                //     Cell::from("").style(Style::default().fg(Color::Yellow)),
-                // ]).height(2),
-            ])
+
+            let mut body_row: Vec<Row> = vec![];
+            let mut y_axis_init = [32,32, 97];                                     
+
+            for y_axis_letter in 98..105 {
+
+                let mut body_cell: Vec<Cell> = vec![];
+                y_axis_init[2] = y_axis_letter;
+
+                match String::from_utf16(&y_axis_init) {
+                    Ok(str_y) => body_cell.push(Cell::from(str_y).style(Style::default().bg(Color::Green))),
+                    Err(..) => ()
+                }   
+                for _ in 1..8 {
+                    body_cell.push(Cell::from(""));
+                }
+
+                body_row.push(Row::new(body_cell).height(2));
+            }
+
+            let tabla = Table::new(body_row)
             // You can set the style of the entire Table.
             .style(Style::default().fg(Color::White))
             // It has an optional header, which is simply a Row always visible at the top.
             .header(
                 Row::new(vec!["", "1", "2", "3","4","5","6","7","8","9"])
-                    .style(Style::default().fg(Color::Yellow).bg(Color::Green)).height(1)
+                    .style(Style::default().fg(Color::Yellow).bg(Color::Green)).height(2)
                     // If you want some space between the header and the rest of the rows, you can always
                     // specify some margin at the bottom.                    
             )
