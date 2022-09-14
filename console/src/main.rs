@@ -10,39 +10,42 @@ fn main() -> Result<(), io::Error>{
     let mut terminal = Terminal::new(backend)?;    
     terminal.clear()?;
     loop {  
-        let screen_size = terminal.size().expect("Error al calcular el tamaño de la pantalla");        
+
+        let _screen_size = terminal.size().expect("Error al calcular el tamaño de la pantalla");        
 
         terminal.draw(|f| {           
             //Principal
             let chunks = Layout::default()
                 .margin(1)                   
                 .direction(Direction::Vertical)                
-                .constraints([Constraint::Percentage(10),Constraint::Percentage(85),Constraint::Percentage(20)].as_ref())
+                .constraints([Constraint::Percentage(10),Constraint::Percentage(80),Constraint::Percentage(20)].as_ref())
                 .split(f.size());
 
-            let copyright = Paragraph::new("BATTLE SHIP RUSTEADO")
+            let title = Paragraph::new("BATTLE SHIP RUSTEADO")
                 .style(Style::default().fg(Color::LightCyan))
                 .alignment(Alignment::Center)
                 .block(
                     Block::default()                    
                     .borders(Borders::ALL)
-                    .title("BATTLE SHIP RUSTEADO")                    
+                    //.title("")                    
                     .border_style(Style::default().fg(Color::White))
                     .border_type(BorderType::Rounded)
                     .style(Style::default().bg(Color::Black))                                           
                 );            
-            f.render_widget(copyright, chunks[0]);                                                                   
+            f.render_widget(title, chunks[0]);                                                                   
                               
-            let chunks2 = Layout::default()
-                .constraints([Constraint::Percentage(40), Constraint::Percentage(30)].as_ref())
+            let area_mid = Layout::default()
+                .constraints([Constraint::Percentage(60), Constraint::Percentage(30)].as_ref())
                 .direction(Direction::Horizontal)
                 .split(chunks[1]);
+
             {
-                let chunks3 = Layout::default()
+                let chunk_tablero = Layout::default()
                     .constraints([Constraint::Percentage(100)].as_ref())
                     .direction(Direction::Horizontal)
-                    .split(chunks2[0]);
+                    .split(area_mid[0]);
                 {
+                    
                   
                     let mut body_row: Vec<Row> = vec![];
                     let mut y_axis_init = [32,32,97];        
@@ -58,7 +61,7 @@ fn main() -> Result<(), io::Error>{
                             Err(..) => ()
                         } 
                         let mut alter = true;                        
-                        for num in 1..10 {                         
+                        for _num in 1..10 {                         
                             match String::from_utf16(&x_axis_init) {
                                 Ok(str_x) => {
                                     if alter {
@@ -71,29 +74,30 @@ fn main() -> Result<(), io::Error>{
                                     }
                                 },
                                 Err(..) => ()                                
-                            } 
-                                                        
-                        }
-        
+                            }                                                         
+                        }        
                         body_row.push(Row::new(body_cell).height(3));
                     }
+                    
 
-                    let tabla = Table::new(body_row)            
-                    .style(Style::default().fg(Color::White))            
-                    .header(
-                        Row::new(vec!["", "1", "2", "3"," 4","5","6","7","8","9"])
-                        .style(Style::default().fg(Color::White).bg(Color::DarkGray)).height(3)                                 
-                    )
-                    .column_spacing(0)            
-                    .block(Block::default().title("Table")    
-                    .borders(Borders::ALL)
-                    .border_style(Style::default().fg(Color::White))
-                    .border_type(BorderType::Rounded)
-                    .style(Style::default().bg(Color::Black)))                                                            
-                    .widths(&[Constraint::Length(6), Constraint::Length(6), Constraint::Length(6),Constraint::Length(6), Constraint::Length(6), Constraint::Length(6),Constraint::Length(6), Constraint::Length(6), Constraint::Length(6),Constraint::Length(6)]);                                                                                  
-                    f.render_widget(tabla, chunks3[0]);
+                    let tablero_widget = Table::new(body_row)            
+                        .style(Style::default().fg(Color::White))            
+                        .header(
+                            Row::new(vec!["", "1", "2", "3"," 4","5","6","7","8","9"])
+                            .style(Style::default().fg(Color::White).bg(Color::DarkGray)).height(3)                                 
+                        )
+                        .column_spacing(0)            
+                        .block(Block::default().title("Table")    
+                        .borders(Borders::ALL)
+                        .border_style(Style::default().fg(Color::White))
+                        .border_type(BorderType::Rounded)
+                        .style(Style::default().bg(Color::Black)))                                                            
+                        .widths(&[Constraint::Length(6), Constraint::Length(6), Constraint::Length(6),Constraint::Length(6), Constraint::Length(6), Constraint::Length(6),Constraint::Length(6), Constraint::Length(6), Constraint::Length(6),Constraint::Length(6)]);                                                                                  
+
+                    f.render_widget(tablero_widget, chunk_tablero[0]);
                 }  
-                let copyright2 = Paragraph::new("Version 1.0")
+                
+                let comand_windget = Paragraph::new("Version 1.0")
                 .style(Style::default().fg(Color::LightCyan))
                 .alignment(Alignment::Center)
                 .block(
@@ -103,12 +107,14 @@ fn main() -> Result<(), io::Error>{
                     .border_style(Style::default().fg(Color::White))
                     .border_type(BorderType::Rounded)
                     .style(Style::default().bg(Color::Black))                                           
-                );                
-                let chunks4 = Layout::default()
-                .constraints([Constraint::Percentage(100)].as_ref())
-                .direction(Direction::Horizontal)
-                .split(chunks2[1]);
-                f.render_widget(copyright2, chunks4[0]);
+                );   
+
+                let chunk_comand = Layout::default()
+                    .constraints([Constraint::Percentage(100)].as_ref())
+                    .direction(Direction::Horizontal)
+                    .split(area_mid[1]);
+
+                f.render_widget(comand_windget, chunk_comand[0]);
             }                   
 
         })?;
